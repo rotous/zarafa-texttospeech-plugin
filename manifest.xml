@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE plugin SYSTEM "manifest.dtd">
+<plugin version="2">
+	<info>
+		<version>0.1</version>
+		<name>texttospeech</name>
+		<title>Text To Speech</title>
+		<author>Ronald Toussaint &lt;lronald.toussaint@zarafa.com&gt;</author>
+		<authorURL>http://www.zarafa.com</authorURL>
+		<description>The Text To Speech plugin makes it possible to have messages read out loud.</description>
+	</info>
+	<config>
+		<configfile>config.php</configfile>
+	</config>
+	<components>
+		<component>
+			<files>
+				<client>
+					<clientfile load="release">js/texttospeech.js</clientfile>
+					<clientfile load="debug">js/texttospeech-debug.js</clientfile>
+					<clientfile load="source">js/TextToSpeech.js</clientfile>
+					<clientfile load="source">js/ttsModule.js</clientfile>
+				</client>
+			</files>
+		</component>
+	</components>
+</plugin>
