@@ -6,7 +6,7 @@
 	var _quality = 'ulaw_22khz_mono';
 	var _text = '';
 	var _speed = 0;
-	var _maxCharsPerRequest = 15;
+	var _maxCharsPerRequest = 500;
 	
 	var _languages = {
 		'ca-es' : 'Catalan',
