@@ -21,6 +21,9 @@
 					<clientfile load="source">js/TextToSpeech.js</clientfile>
 					<clientfile load="source">js/ttsModule.js</clientfile>
 				</client>
+				<resources>
+					<resourcefile load="source">css/texttospeech.css</resourcefile>
+				</resources>
 			</files>
 		</component>
 	</components>

@@ -61,7 +61,9 @@
 	
 	var _audioObject;
 	var _audioPlaying = false;
+	var _audioPaused = false;
 	var _audioBuffer = [];
+	var _pendingRequests = [];
 	
 	function _isBreakpoint(ch) {
 		return [" ", ".", ";", "?", "!", ",", "\t", "\n"].indexOf(ch) >= 0;
@@ -92,7 +94,7 @@
 		if ( !_audioObject ) {
 			// Create an audio object
 			_audioObject = new Audio();
-			_audioObject.addEventListener('playing', function(){
+			_audioObject.addEventListener('loadeddata', function(){
 				console.log('play started', _audioObject.src)				
 				_audioPlaying = true;
 				// Release resource when it's loaded
@@ -104,6 +106,9 @@
 					console.log('audio ended, but buffer found, so starting again')
 					_audioObject.src = _audioBuffer.shift();
 					_audioObject.play();
+				} else {
+					// Let the audio object send a custom event
+					_audioObject.dispatchEvent(new Event('playbackstopped'));
 				}
 			});
 		}
@@ -132,7 +137,8 @@
 		var request = new XMLHttpRequest();
 		request.open('POST', 'http://api.voicerss.org/');
 		request.responseType = 'arraybuffer';
-		request.addEventListener("load", function() {
+		request.onLoadListener = function() {
+			_pendingRequests.splice(_pendingRequests.indexOf(request), 1);
 			if ( typeof callback === 'function' ){
 				var error = _isErrorResponse(request.response); 
 				if ( error ){
@@ -141,17 +147,17 @@
 				} else {
 				    var blob = new Blob([request.response], {type: 'audio/mp3'});
 				    var objUrl = URL.createObjectURL(blob);
-				    console.log('created objectUrl', objUrl)
 					callback(false, objUrl, request);
 				}
 			}
-		});
+		};
+		request.addEventListener("load", request.onLoadListener);
 		request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-//		var params = 'key=700c20d72f81465fbc2cae7244685d47&hl=en-gb&f=ulaw_22khz_mono&src='+encodeURIComponent(text);
 		var params = 'key=' + _apiKey +
 					 '&hl=' + _language +
 					 '&f=' + _quality +
 					 '&src=' + text;
+		_pendingRequests.push(request);
 		request.send(params);
 	}
 	
@@ -185,6 +191,8 @@
 			_maxCharsPerRequest = parseInt(maxCharsPerRequest, 10);
 		},
 		
+		getAudioObject: _getAudioObject,
+		
 		readOut : function(text) {
 			if ( text.length > _maxCharsPerRequest ){
 				text = _splitText(text);
@@ -205,11 +213,6 @@
 						var audio = _getAudioObject();
 						if ( !_audioPlaying && _audioBuffer.length===0 ){
 							audio.src = audioUrl;
-							// Release resource when it's loaded
-							audio.onload = function(evt) {
-								console.log('revokeObjectUrl', audioUrl);
-								URL.revokeObjectUrl(audioUrl);
-							};
 							audio.play();
 						} else {
 							_audioBuffer.push(audioUrl);
@@ -220,6 +223,41 @@
 			}
 			
 			recursiveGetAndReadText();
+		},
+		
+		stopPlayback: function(){
+			if ( !_audioPlaying ){
+				return;
+			}
+			var audio = _getAudioObject();
+			audio.pause();
+			_audioPlaying = false;
+			_audioBuffer.length = 0;
+			while ( _pendingRequests.length ){
+				var request = _pendingRequests.shift();
+				request.removeEventListener('load', request.onLoadListener);
+			}
+			
+			// Let the audio object send a custom event
+			audio.dispatchEvent(new Event('playbackstopped'));
+		},
+		
+		pausePlayback: function(){
+			if ( !_audioPlaying ){
+				return;
+			}
+			var audio = _getAudioObject();
+			audio.pause();
+			_audioPaused = true;
+		},
+		
+		resumePlayback: function(){
+			if ( !_audioPaused ){
+				return;
+			}
+			var audio = _getAudioObject();
+			audio.play();
+			_audioPaused = false;
 		}
 	};
 	

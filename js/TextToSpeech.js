@@ -7,6 +7,9 @@ Ext.namespace('Zarafa.plugins.texttospeech');
  * 
  */
 Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
+	onPlaybackStartedHandler : null,
+	onPlaybackStoppedHandler : null,
+	
 	/**
 	 * Constructor
 	 * @protected
@@ -27,13 +30,53 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 	{
 		return {
 			xtype: 'button',
-			text: 'speech',
-			handler: function(){
-				var record = this.ownerCt.record;
-				ttsModule.setApiKey('700c20d72f81465fbc2cae7244685d47');
-				ttsModule.readOut(record.get('body'));
+			cls: 'tts-audio',
+			iconCls: 'tts-play',
+			tooltip: _('speech'),
+			handler: this.onClick,
+			listeners: {
+				beforerender: this.onBeforeRender,
+				destroy: this.onDestroy,
+				scope: this
 			}
 		};
+	},
+	
+	onClick: function(btn) {
+		console.log('icon class=', btn.iconCls)
+		if ( btn.iconCls === 'tts-play' ){
+			var record = this.ownerCt.record;
+			ttsModule.setApiKey('700c20d72f81465fbc2cae7244685d47');
+			ttsModule.readOut(record.get('body'));
+		} else {
+			ttsModule.stopPlayback();
+		}
+	},
+	
+	onBeforeRender: function(btn){
+		var audio = ttsModule.getAudioObject();
+		this.onPlaybackStartedHandler = this.onAudioPlaybackStart.createDelegate(this, [btn]);
+		this.onPlaybackStoppededHandler = this.onAudioPlaybackStopped.createDelegate(this, [btn]);
+		audio.addEventListener('loadstart', this.onPlaybackStartedHandler);
+		audio.addEventListener('playbackstopped', this.onPlaybackStoppededHandler);
+	},
+	
+	onDestroy : function(btn){
+		var audio = ttsModule.getAudioObject();
+		audio.removeEventListener('loadstart', this.onPlaybackStartedHandler);
+		audio.removeEventListener('playbackstopped', this.onPlaybackStoppededHandler);
+	},
+	
+	onAudioPlaybackStart: function(btn) {
+		console.log('btn sees that playback has started', arguments)
+		// Change the icon class of the button (this will change the behavior)
+		btn.setIconClass('tts-stop');
+	},
+	
+	onAudioPlaybackStopped: function(btn) {
+		console.log('btn sees that playback has stopped', arguments)
+		// Change the icon class of the button (this will change the behavior)
+		btn.setIconClass('tts-play');
 	}
 });
 
