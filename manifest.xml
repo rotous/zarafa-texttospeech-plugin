@@ -19,7 +19,8 @@
 					<clientfile load="release">js/texttospeech.js</clientfile>
 					<clientfile load="debug">js/texttospeech-debug.js</clientfile>
 					<clientfile load="source">js/TextToSpeech.js</clientfile>
-					<clientfile load="source">js/ttsModule.js</clientfile>
+					<clientfile load="source">js/tts.voicerss.js</clientfile>
+					<clientfile load="source">js/tts.native.js</clientfile>
 				</client>
 				<resources>
 					<resourcefile load="source">css/texttospeech.css</resourcefile>

@@ -4,6 +4,7 @@
 	var _apiKey;
 	var _language = 'en-gb';
 	var _quality = 'ulaw_22khz_mono';
+	var _codec = 'MP3';
 	var _text = '';
 	var _speed = 0;
 	var _maxCharsPerRequest = 500;
@@ -47,6 +48,8 @@
 		'ulaw_44khz_mono' : 'uLaw, 44 kHz, Mono',
 		'ulaw_44khz_stereo' : 'uLaw, 44 kHz, Stereo'
 	};
+	
+	var _codecs = ['MP3', 'OGG', 'WAV', 'AAC'];
 	
 	var _errors = {
 		ERR_EXPIRED : 'The subscription is expired or requests count limitation is exceeded!',
@@ -156,6 +159,7 @@
 		var params = 'key=' + _apiKey +
 					 '&hl=' + _language +
 					 '&f=' + _quality +
+					 '&c=' + _codec +
 					 '&src=' + text;
 		_pendingRequests.push(request);
 		request.send(params);
@@ -187,13 +191,19 @@
 			}
 		},
 		
+		setCodec : function(codec) {
+			if ( _codecs.indexOf(codec) >= 0 ){
+				_codec = codec;
+			}
+		},
+		
 		setMaxCharsPerRequest : function(maxCharsPerRequest) {
 			_maxCharsPerRequest = parseInt(maxCharsPerRequest, 10);
 		},
 		
 		getAudioObject: _getAudioObject,
 		
-		readOut : function(text) {
+		speak : function(text) {
 			if ( text.length > _maxCharsPerRequest ){
 				text = _splitText(text);
 			} else {
@@ -261,5 +271,6 @@
 		}
 	};
 	
-	window.ttsModule = ttsModule;
+	window.tts = window.tts || {};
+	window.tts.voicerss = ttsModule;
 })();

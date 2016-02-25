@@ -10,6 +10,8 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 	onPlaybackStartedHandler : null,
 	onPlaybackStoppedHandler : null,
 	
+	ttsModule : null,
+	
 	/**
 	 * Constructor
 	 * @protected
@@ -24,6 +26,16 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 
 	initPlugin : function()
 	{
+		if ( speechSynthesis && speechSynthesis.getVoices().length ){
+			this.ttsModule = tts.native;
+		} else {
+			this.ttsModule = tts.voicerss;
+			this.ttsModule.setApiKey('700c20d72f81465fbc2cae7244685d47');
+			if ( window !== window.parent ){
+				// This is probably DeskApp, which doesn't support mp3
+				this.tssModule.setCodec('OGG');
+			}
+		}
 	},
 	
 	createButton: function()
@@ -34,6 +46,7 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 			iconCls: 'tts-play',
 			tooltip: _('speech'),
 			handler: this.onClick,
+			ttsModule: this.ttsModule,
 			listeners: {
 				beforerender: this.onBeforeRender,
 				destroy: this.onDestroy,
@@ -43,18 +56,16 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 	},
 	
 	onClick: function(btn) {
-		console.log('icon class=', btn.iconCls)
 		if ( btn.iconCls === 'tts-play' ){
 			var record = this.ownerCt.record;
-			ttsModule.setApiKey('700c20d72f81465fbc2cae7244685d47');
-			ttsModule.readOut(record.get('body'));
+			this.ttsModule.speak(record.get('body'));
 		} else {
-			ttsModule.stopPlayback();
+			this.ttsModule.stopPlayback();
 		}
 	},
 	
 	onBeforeRender: function(btn){
-		var audio = ttsModule.getAudioObject();
+		var audio = this.ttsModule.getAudioObject();
 		this.onPlaybackStartedHandler = this.onAudioPlaybackStart.createDelegate(this, [btn]);
 		this.onPlaybackStoppededHandler = this.onAudioPlaybackStopped.createDelegate(this, [btn]);
 		audio.addEventListener('loadstart', this.onPlaybackStartedHandler);
@@ -62,19 +73,17 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 	},
 	
 	onDestroy : function(btn){
-		var audio = ttsModule.getAudioObject();
+		var audio = this.ttsModule.getAudioObject();
 		audio.removeEventListener('loadstart', this.onPlaybackStartedHandler);
 		audio.removeEventListener('playbackstopped', this.onPlaybackStoppededHandler);
 	},
 	
 	onAudioPlaybackStart: function(btn) {
-		console.log('btn sees that playback has started', arguments)
 		// Change the icon class of the button (this will change the behavior)
 		btn.setIconClass('tts-stop');
 	},
 	
 	onAudioPlaybackStopped: function(btn) {
-		console.log('btn sees that playback has stopped', arguments)
 		// Change the icon class of the button (this will change the behavior)
 		btn.setIconClass('tts-play');
 	}
