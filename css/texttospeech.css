@@ -4,3 +4,13 @@
 .tts-stop {
     background: url(../images/icon_stop.png) no-repeat center center;
 }
+
+.zarafa-texttospeech-settings-infopanel {
+    margin-bottom: 9px;
+}
+.zarafa-texttospeech-settings-infopanel p {
+    margin-bottom: 1em;
+}
+.zarafa-texttospeech-settings-infopanel p:last-of-type {
+    margin-bottom: 0;
+}

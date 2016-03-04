@@ -21,6 +21,10 @@
 					<clientfile load="source">js/TextToSpeech.js</clientfile>
 					<clientfile load="source">js/tts.voicerss.js</clientfile>
 					<clientfile load="source">js/tts.native.js</clientfile>
+					<clientfile load="source">js/languageMap.js</clientfile>
+					<clientfile load="source">js/settings/SettingsCategoryTextToSpeech.js</clientfile>
+					<clientfile load="source">js/settings/SettingsWidgetTextToSpeechVoiceRSS.js</clientfile>
+					<clientfile load="source">js/settings/SettingsWidgetTextToSpeechVoices.js</clientfile>
 				</client>
 				<resources>
 					<resourcefile load="source">css/texttospeech.css</resourcefile>

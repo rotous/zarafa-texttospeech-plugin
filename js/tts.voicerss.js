@@ -10,32 +10,32 @@
 	var _maxCharsPerRequest = 500;
 	
 	var _languages = {
-		'ca-es' : 'Catalan',
-		'zh-cn' : 'Chinese (China)',
-		'zh-hk' : 'Chinese (Hong Kong)',
-		'zh-tw' : 'Chinese (Taiwan)',
-		'da-dk' : 'Danish',
-		'nl-nl' : 'Dutch',
-		'en-au' : 'English (Australia)',
-		'en-ca' : 'English (Canada)',
-		'en-gb' : 'English (Great Britain)',
-		'en-in' : 'English (India)',
-		'en-us' : 'English (United States)',
-		'fi-fi' : 'Finnish',
-		'fr-ca' : 'French (Canada)',
-		'fr-fr' : 'French (France)',
-		'de-de' : 'German',
-		'it-it' : 'Italian',
-		'ja-jp' : 'Japanese',
-		'ko-kr' : 'Korean',
-		'nb-no' : 'Norwegian',
-		'pl-pl' : 'Polish',
-		'pt-br' : 'Portuguese (Brazil)',
-		'pt-pt' : 'Portuguese (Portugal)',
-		'ru-ru' : 'Russian',
-		'es-mx' : 'Spanish (Mexico)',
-		'es-es' : 'Spanish (Spain)',
-		'sv-se' : 'Swedish (Sweden)'
+		'ca-ES' : 'Catalan',
+		'zh-CN' : 'Chinese (China)',
+		'zh-HK' : 'Chinese (Hong Kong)',
+		'zh-TW' : 'Chinese (Taiwan)',
+		'da-DK' : 'Danish',
+		'nl-NL' : 'Dutch',
+		'en-AU' : 'English (Australia)',
+		'en-CA' : 'English (Canada)',
+		'en-GB' : 'English (Great Britain)',
+		'en-IN' : 'English (India)',
+		'en-US' : 'English (United States)',
+		'fi-FI' : 'Finnish',
+		'fr-CA' : 'French (Canada)',
+		'fr-FR' : 'French (France)',
+		'de-DE' : 'German',
+		'it-IT' : 'Italian',
+		'ja-JP' : 'Japanese',
+		'ko-KR' : 'Korean',
+		'nb-NO' : 'Norwegian',
+		'pl-PL' : 'Polish',
+		'pt-BR' : 'Portuguese (Brazil)',
+		'pt-PT' : 'Portuguese (Portugal)',
+		'ru-RU' : 'Russian',
+		'es-MX' : 'Spanish (Mexico)',
+		'es-ES' : 'Spanish (Spain)',
+		'sv-SE' : 'Swedish (Sweden)'
 	};
 	
 	var _qualities = {
@@ -202,6 +202,19 @@
 		},
 		
 		getAudioObject: _getAudioObject,
+		
+		getVoices : function() {
+			var voices = [];
+			for ( var k in _languages ){
+				voices.push({
+					lang: k,
+					name: 'VoiceRSS ' + _languages[k],
+					localService: false
+				});
+			}
+			
+			return voices;
+		},
 		
 		speak : function(text) {
 			if ( text.length > _maxCharsPerRequest ){

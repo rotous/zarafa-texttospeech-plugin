@@ -53,6 +53,8 @@
 			return _voices;
 		},
 		
+		getVoice : _getVoice,
+		
 		setVoice : function(language, name){
 			var voice = _getVoice(language, name);
 			if ( voice ){
