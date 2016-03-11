@@ -55,7 +55,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 			// reader config
 			root: 'voices',
 			idProperty: 'name',
-			fields: ['enabled', 'name', 'langCode']
+			fields: ['enabled', 'name', 'lang']
 		});
 		var combo = new Ext.form.ComboBox({
 			xtype: 'combo',
@@ -74,6 +74,17 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 					var voices = this.ttsPlugin.availableVoices[lang];
 					combo.store.loadData({voices: voices});
 					combo.setValue(voices[0].name);
+				},
+				select : function(combo){
+					console.log('change');
+					var gridStore = this.grid.getStore();
+					var gridRecord = combo.gridEditor.record;
+					var comboPreviouslySelectedRecord = combo.store.getById(gridRecord.get('name'));
+					// We must change the language because it might have changed from 
+					// en_US to en_GB for example
+					if ( gridRecord.get('name') === comboPreviouslySelectedRecord.get('name') ){
+						gridRecord.set('langCode', comboPreviouslySelectedRecord.get('lang'));
+					}
 				},
 				scope: this
 			}
@@ -128,12 +139,6 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 			idProperty: 'lang',
 			fields: ['enabled', 'lang', 'langCode', 'name']
 		});
-		
-		languageStore.on('load', function(){
-			if ( this.grid ){
-				this.setGridSelection();
-			}
-		}, this);
 		
 		return languageStore;
 	},
