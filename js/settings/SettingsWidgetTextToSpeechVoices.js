@@ -1,15 +1,10 @@
 Ext.namespace('Zarafa.plugins.texttospeech.settings');
 
 Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.settings.ui.SettingsWidget, {
-	availableVoices : [],
-	
-	selectedVoices : null,
+	ttsPlugin : null,
 	
 	constructor : function(config) {
 		config = config || {};
-
-		this.updateVoices();
-		this.loadSelectedVoices();
 		
 		this.selModel = new Ext.grid.CheckboxSelectionModel({
 			header: _('Enabled'), 
@@ -32,11 +27,11 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 			height: 'auto',
 			items : [{
 				xtype: 'editorgrid',
-				height: Object.keys(this.availableVoices).length * 33 +36,
+				height: Object.keys(config.ttsPlugin.availableVoices).length * 33 +36,
 				ref: 'grid',
 				colModel: this.getColumnModel(),
 				selModel: this.selModel,
-				store: this.getLanguageStore(),
+				store: this.getLanguageStore(config.ttsPlugin),
 				autoExpandColumn: 2,
 				clicksToEdit: 1,
 				listeners: {
@@ -76,7 +71,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 			listeners: {
 				beforeshow : function(combo){
 					var lang = combo.gridEditor.record.get('lang');
-					var voices = this.availableVoices[lang];
+					var voices = this.ttsPlugin.availableVoices[lang];
 					combo.store.loadData({voices: voices});
 					combo.setValue(voices[0].name);
 				},
@@ -108,12 +103,11 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 		});
 	},
 	
-	getLanguageStore : function()
+	getLanguageStore : function(ttsPlugin)
 	{
-		this.updateVoices();
 		var langs = {languages:[]};
-		for ( var lang in this.selectedVoices ){
-			var voice = this.selectedVoices[lang];
+		for ( var lang in ttsPlugin.selectedVoices ){
+			var voice = ttsPlugin.selectedVoices[lang];
 			langs.languages.push({
 				lang: lang, 
 				enabled: voice.enabled, 
@@ -147,7 +141,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 	setGridSelection : function() {
 		// select the voices that are enabled
 		var records = [];
-		var selectedVoices = this.selectedVoices;
+		var selectedVoices = this.ttsPlugin.selectedVoices;
 		this.grid.store.each(function(record){
 			var lang = record.get('lang');
 			if ( selectedVoices[lang].enabled ){
@@ -182,17 +176,18 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 		// but in localStorage because the settings are for
 		// this browser on this computer only
 		var selectedRecords = this.grid.getSelectionModel().getSelections();
-		this.selectedVoices = {};
+		this.ttsPlugin.selectedVoices = {};
 		this.grid.getStore().each(function(item){
-			this.selectedVoices[item.get('lang')] = {
+			this.ttsPlugin.selectedVoices[item.get('lang')] = {
 				enabled: item.get('enabled'),
 				name: item.get('name'),
 				langCode: item.get('langCode')
 			};
 		}, this);
-		localStorage.setItem('tts_selected_voices', JSON.stringify(this.selectedVoices));
+		localStorage.setItem('tts_selected_voices', JSON.stringify(this.ttsPlugin.selectedVoices));
 	},
 	
+/*
 	loadSelectedVoices : function()
 	{
 		// Try to find selected voices in local storage
@@ -256,6 +251,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 		
 		this.availableVoices = voices;
 	}
+*/
 });
 
 Ext.reg('zarafa.texttospeech.settingswidgetvoices', Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices);

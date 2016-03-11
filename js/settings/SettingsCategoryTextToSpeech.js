@@ -1,6 +1,8 @@
 Ext.namespace('Zarafa.plugins.texttospeech.settings');
 
 Zarafa.plugins.texttospeech.settings.SettingsCategoryTextToSpeech = Ext.extend(Zarafa.settings.ui.SettingsCategory, {
+	ttsPlugin: null,
+	
 	constructor : function(config) {
 		config = config || {};
 
@@ -38,6 +40,7 @@ Zarafa.plugins.texttospeech.settings.SettingsCategoryTextToSpeech = Ext.extend(Z
 					ref: 'voiceRssWidget'
 				},{
 					xtype : 'zarafa.texttospeech.settingswidgetvoices',
+					ttsPlugin: config.ttsPlugin,
 					settingsContext : config.settingsContext,
 					ref: 'voicesWidget'
 				}

@@ -13,6 +13,9 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 	/* The module that is currently playing */
 	ttsModule : null,
 	
+	selectedVoices: {},
+	availableVoices: undefined,
+	
 	/**
 	 * Constructor
 	 * @protected
@@ -37,6 +40,8 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 			// This is probably DeskApp, which doesn't support mp3
 			tts.voicerss.setCodec('OGG');
 		}
+		
+		this.loadSelectedVoices();
 	},
 	
 	createButton: function()
@@ -87,7 +92,7 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 		var record = item.ownerCt.ownerCt.ownerCt.record;
 		
 		var voice = tts.native.getVoice(item.langCode, item.name);
-		if ( voice.name === item.name ){
+		if ( voice && voice.name === item.name ){
 			// We found a native voice
 			this.ttsModule = tts.native;
 			tts.native.setVoice(item.langCode, item.name);
@@ -127,8 +132,84 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 	
 	createSettingCategory: function() {
 		return {
-			xtype: 'zarafa.texttospeech.settingscategory'
+			xtype: 'zarafa.texttospeech.settingscategory',
+			ttsPlugin: this
 		};
+	},
+	
+	loadSelectedVoices : function()
+	{
+		var availableVoices = this.getAvailableVoices();
+
+		// Try to find selected voices in local storage
+		var selectedVoices = localStorage.getItem('tts_selected_voices');
+		if ( selectedVoices ) {
+			this.selectedVoices = JSON.parse(selectedVoices);
+		} else {
+			// If no selection was stored in local storage
+			// we will create an initial selection for the user.
+			// We will enable only the English voice.
+			this.selectedVoices = {};
+			for ( var lang in availableVoices ){
+				var voice = null;
+				// See if a default voice was set for this language
+				for ( var i=0; i<availableVoices[lang][i]; i++ ){
+					if ( availableVoices[lang][i]['default'] === true ){
+						voice = availableVoices[lang][i];
+						break;
+					}
+				}
+				if ( voice === null ){
+					// No default voice was found for this language. Let's use the
+					// first available language.
+					voice = availableVoices[lang][0];
+				}
+				this.selectedVoices[lang] = {
+					name: voice.name,
+					langCode: voice.lang
+				};
+				
+				// Enable only English
+				this.selectedVoices[lang].enabled = lang === 'en';
+			}
+			// Store the created selection in local storage
+			localStorage.setItem('tts_selected_voices', JSON.stringify(this.selectedVoices));
+			console.log('initially selected voices created');
+		}
+		
+		console.log('selected voices loaded');
+	},
+	
+	getAvailableVoices : function(settingsModel)
+	{
+		if ( this.availableVoices instanceof Array ){
+			// available voices were already found, so return them;
+			return this.availableVoices;
+		}
+		
+		var nativeVoices = tts.native.getVoices();
+		for ( var i=0; i<nativeVoices.length; i++ ){
+			nativeVoices[i].tts = tts.native;
+		}
+
+		var voiceRssVoices = tts.voicerss.getVoices();
+		for ( i=0; i<voiceRssVoices.length; i++ ){
+			voiceRssVoices[i].tts = tts.voicerss;
+		}
+		
+		this.availableVoices = tts.native.getVoices().concat(tts.voicerss.getVoices());
+		// Group the voices by language
+		var voices = {};
+		for ( i=0; i<this.availableVoices.length; i++ ){
+			var lang = this.availableVoices[i].lang.substring(0,2);
+			if ( !Ext.isDefined(voices[lang]) ){
+				voices[lang] = [];
+			}
+			voices[lang].push(this.availableVoices[i]);
+		}
+		
+		this.availableVoices = voices;
+		return voices;
 	}
 });
 

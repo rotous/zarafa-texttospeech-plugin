@@ -47,7 +47,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetTextToSpeechVoiceRSS = Ext.ex
 		settingsModel.beginEdit();
 		settingsModel.set(this.apiKey.name, apiKey);
 		settingsModel.endEdit();
-		this.ownerCt.voicesWidget.updateVoices(settingsModel);
+//		this.ownerCt.voicesWidget.updateVoices(settingsModel);
 	}
 	
 });
