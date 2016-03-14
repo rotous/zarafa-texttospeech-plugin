@@ -14,3 +14,7 @@
 .zarafa-texttospeech-settings-infopanel p:last-of-type {
     margin-bottom: 0;
 }
+
+.zarafa-texttospeechplugin-settingswidgetvoices-name {
+    min-width: 150px;
+}

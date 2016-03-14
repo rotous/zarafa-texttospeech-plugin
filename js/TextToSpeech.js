@@ -182,7 +182,7 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 	
 	getAvailableVoices : function(settingsModel)
 	{
-		if ( this.availableVoices instanceof Array ){
+		if ( this.availableVoices instanceof Object ){
 			// available voices were already found, so return them;
 			return this.availableVoices;
 		}

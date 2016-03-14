@@ -42,7 +42,8 @@ Zarafa.plugins.texttospeech.settings.SettingsCategoryTextToSpeech = Ext.extend(Z
 					xtype : 'zarafa.texttospeech.settingswidgetvoices',
 					ttsPlugin: config.ttsPlugin,
 					settingsContext : config.settingsContext,
-					ref: 'voicesWidget'
+					ref: 'voicesWidget',
+					id: 'someid'
 				}
 			]
 		});
