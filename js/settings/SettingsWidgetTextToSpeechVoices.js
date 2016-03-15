@@ -164,6 +164,9 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 	
 	getVoicePickers : function(ttsPlugin)
 	{
+		if ( !Ext.isDefined(ttsPlugin) ){
+			ttsPlugin = this.ttsPlugin;
+		}
 		var items = [];
 		var availableVoices = ttsPlugin.getAvailableVoices();
 		var selectedVoices = ttsPlugin.selectedVoices;
@@ -175,7 +178,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 				// reader config
 				root: 'voices',
 				idProperty: 'name',
-				fields: ['enabled', 'name', 'lang']
+				fields: ['enabled', 'name', 'lang', 'module']
 			});
 			var combo = new Ext.form.ComboBox({
 				xtype: 'combo',
@@ -216,8 +219,13 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 							var combo = this[btn.lang]['combo'];
 							var record = combo.findRecord('name', combo.getValue());
 							console.log('speaking '+getLanguageName(btn.lang)+' with '+this[btn.lang]['combo'].getValue());
-							tts.native.setVoice(record.get('lang'), record.get('name'));
-							tts.native.speak('Zarafa collaboration software');
+							if ( record.get('module') === 'native' ){
+								tts.native.setVoice(record.get('lang'), record.get('name'));
+								tts.native.speak('Zarafa collaboration software');
+							} else if ( record.get('module') === 'voicerss' ) {
+								tts.voicerss.setLanguage(record.get('lang'));
+								tts.voicerss.speak('Zarafa collaboration software');
+							}
 						},
 						scope: this
 					}
@@ -237,7 +245,11 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 	 */
 	update : function(settingsModel)
 	{
-//		this.setGridSelection();
+//		var selectedVoices = this.ttsPlugin.getSelectedVoices();
+//		this.items = new Ext.util.MixedCollection({
+//			items: this.getVoicePickers()
+//		});
+//		this.doLayout();
 	},
 	
 	/**
@@ -265,71 +277,6 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 */
 	},
 	
-/*
-	loadSelectedVoices : function()
-	{
-		// Try to find selected voices in local storage
-		var selectedVoices = localStorage.getItem('tts_selected_voices');
-		if ( selectedVoices ) {
-			this.selectedVoices = JSON.parse(selectedVoices);
-		} else {
-			// If no selection was stored in local storage
-			// we will create an initial selection for the user.
-			// We will enable only the English voice.
-			this.selectedVoices = {};
-			for ( var lang in this.availableVoices ){
-				var voice = null;
-				// See if a default voice was set for this language
-				for ( var i=0; i<this.availableVoices[lang][i]; i++ ){
-					if ( this.availableVoices[lang][i]['default'] === true ){
-						voice = this.availableVoices[lang][i];
-						break;
-					}
-				}
-				if ( voice === null ){
-					// No default voice was found for this language. Let's use the
-					// first available language.
-					voice = this.availableVoices[lang][0];
-				}
-				this.selectedVoices[lang] = {
-					name: voice.name,
-					langCode: voice.lang
-				};
-				
-				// Enable only English
-				this.selectedVoices[lang].enabled = lang === 'en';
-			}
-			// Store the created selection in local storage
-			localStorage.setItem('tts_selected_voices', JSON.stringify(this.selectedVoices));
-		}
-	},
-	
-	updateVoices : function(settingsModel)
-	{
-		var nativeVoices = tts.native.getVoices();
-		for ( var i=0; i<nativeVoices.length; i++ ){
-			nativeVoices[i].tts = tts.native;
-		}
-
-		var voiceRssVoices = tts.voicerss.getVoices();
-		for ( i=0; i<voiceRssVoices.length; i++ ){
-			voiceRssVoices[i].tts = tts.voicerss;
-		}
-		
-		this.availableVoices = tts.native.getVoices().concat(tts.voicerss.getVoices());
-		// Group the voices by language
-		var voices = {};
-		for ( i=0; i<this.availableVoices.length; i++ ){
-			var lang = this.availableVoices[i].lang.substring(0,2);
-			if ( !Ext.isDefined(voices[lang]) ){
-				voices[lang] = [];
-			}
-			voices[lang].push(this.availableVoices[i]);
-		}
-		
-		this.availableVoices = voices;
-	}
-*/
 });
 
 Ext.reg('zarafa.texttospeech.settingswidgetvoices', Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices);

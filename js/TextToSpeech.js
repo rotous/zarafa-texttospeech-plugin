@@ -41,7 +41,7 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 			tts.voicerss.setCodec('OGG');
 		}
 		
-		this.loadSelectedVoices();
+		this.selectedVoices = this.getSelectedVoices();
 	},
 	
 	createButton: function()
@@ -137,7 +137,7 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 		};
 	},
 	
-	loadSelectedVoices : function()
+	getSelectedVoices : function()
 	{
 		var availableVoices = this.getAvailableVoices();
 
@@ -178,6 +178,7 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 		}
 		
 		console.log('selected voices loaded');
+		return this.selectedVoices;
 	},
 	
 	getAvailableVoices : function(settingsModel)
@@ -189,15 +190,15 @@ Zarafa.plugins.texttospeech.TextToSpeech = Ext.extend(Zarafa.core.Plugin, {
 		
 		var nativeVoices = tts.native.getVoices();
 		for ( var i=0; i<nativeVoices.length; i++ ){
-			nativeVoices[i].tts = tts.native;
+			nativeVoices[i].module = 'native';
 		}
 
 		var voiceRssVoices = tts.voicerss.getVoices();
 		for ( i=0; i<voiceRssVoices.length; i++ ){
-			voiceRssVoices[i].tts = tts.voicerss;
+			voiceRssVoices[i].module = 'voicerss';
 		}
 		
-		this.availableVoices = tts.native.getVoices().concat(tts.voicerss.getVoices());
+		this.availableVoices =nativeVoices.concat(voiceRssVoices);
 		// Group the voices by language
 		var voices = {};
 		for ( i=0; i<this.availableVoices.length; i++ ){
