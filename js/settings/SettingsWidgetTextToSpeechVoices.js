@@ -6,160 +6,13 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 	constructor : function(config) {
 		config = config || {};
 		
-		this.selModel = new Ext.grid.CheckboxSelectionModel({
-			header: _('Enabled'), 
-			width: 100, 
-			checkOnly: true,
-			listeners : {
-				rowselect: function(selModel, rowIndex, record ) {
-					record.set('enabled', true);
-				},
-				rowdeselect: function(selModel, rowIndex, record ) {
-					record.set('enabled', false);
-				},
-				scope: this
-			}
-		});
-		
 		Ext.applyIf(config, {
 			title : _('Available Voices'),
 			height: 'auto',
-			items : [
-/*			
-			{
-				xtype: 'editorgrid',
-				height: Object.keys(config.ttsPlugin.availableVoices).length * 33 +36,
-				ref: 'grid',
-				colModel: this.getColumnModel(),
-				selModel: this.selModel,
-				store: this.getLanguageStore(config.ttsPlugin),
-				autoExpandColumn: 2,
-				clicksToEdit: 1,
-				listeners: {
-					viewready: function(){
-						this.setGridSelection();
-					},
-					scope: this
-				}
-			}
-*/
-			].concat(this.getVoicePickers(config.ttsPlugin))
+			items : this.getVoicePickers(config.ttsPlugin)
 		});
-		
-		console.log([].concat(this.getVoicePickers(config.ttsPlugin)));
 		
 		Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices.superclass.constructor.call(this, config);
-	},
-	
-	getColumnModel : function()
-	{
-		var comboStore = new Ext.data.JsonStore({
-			// store config
-			autoDestroy: true,
-			data: {voices:[]},
-			// reader config
-			root: 'voices',
-			idProperty: 'name',
-			fields: ['enabled', 'name', 'lang']
-		});
-		var combo = new Ext.form.ComboBox({
-			xtype: 'combo',
-			mode: 'local',
-			triggerAction: 'all',
-			store: comboStore,
-			width: 250,
-			displayField: 'name',
-			valueField: 'name',
-			forceSelection: true,
-			editable: false,
-			allowBlank: false,
-			listeners: {
-				beforeshow : function(combo){
-					var lang = combo.gridEditor.record.get('lang');
-					var voices = this.ttsPlugin.availableVoices[lang];
-					combo.store.loadData({voices: voices});
-					combo.setValue(voices[0].name);
-				},
-				select : function(combo){
-					console.log('change');
-					var gridStore = this.grid.getStore();
-					var gridRecord = combo.gridEditor.record;
-					var comboPreviouslySelectedRecord = combo.store.getById(gridRecord.get('name'));
-					// We must change the language because it might have changed from 
-					// en_US to en_GB for example
-					if ( gridRecord.get('name') === comboPreviouslySelectedRecord.get('name') ){
-						gridRecord.set('langCode', comboPreviouslySelectedRecord.get('lang'));
-					}
-				},
-				scope: this
-			}
-		});
-		
-		return new Ext.grid.ColumnModel({
-	        columns: [
-		        this.selModel,
-	            {
-	            	header: _('Language'), 
-	            	sortable: true, 
-	            	dataIndex: 'lang',
-	            	renderer: function(value){
-	            		return getLanguageName(value);
-	            	}
-				},{
-					header: _('Selected voice'),
-					width: '',
-					sortable: false,
-					dataIndex: 'name',
-					renderer: function(value){
-						return value;
-					},
-					editor: combo
-				}
-			]
-		});
-	},
-	
-	getLanguageStore : function(ttsPlugin)
-	{
-		var langs = {languages:[]};
-		for ( var lang in ttsPlugin.selectedVoices ){
-			var voice = ttsPlugin.selectedVoices[lang];
-			langs.languages.push({
-				lang: lang, 
-				enabled: voice.enabled, 
-				name: voice.name,
-				langCode: voice.langCode
-			});
-		}
-		langs.languages.sort(function(l1, l2){
-			return l1.lang.localeCompare(l2.lang);
-		});
-		
-		var languageStore = new Ext.data.JsonStore({
-			// store configs
-			autoDestroy: true,
-			data: langs,
-			// reader configs
-			root: 'languages',
-			idProperty: 'lang',
-			fields: ['enabled', 'lang', 'langCode', 'name']
-		});
-		
-		return languageStore;
-	},
-	
-	setGridSelection : function() {
-		// select the voices that are enabled
-		var records = [];
-		var selectedVoices = this.ttsPlugin.selectedVoices;
-		this.grid.store.each(function(record){
-			var lang = record.get('lang');
-			if ( selectedVoices[lang].enabled ){
-				records.push(record);
-			}
-		});
-		
-		this.grid.getSelectionModel().selectRecords(records);
 	},
 	
 	getVoicePickers : function(ttsPlugin)
@@ -195,10 +48,10 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 				value: selectedVoices[lang].name
 			});
 
-			items.push({
+			items.push(new Ext.form.CompositeField({
 				xtype: 'compositefield',
 				hideLabel: true,
-				ref: lang.substring(0,2),
+				ref: lang,
 				items: [
 					{
 						xtype: 'checkbox',
@@ -230,7 +83,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 						scope: this
 					}
 				]
-			});
+			}));
 		}
 		
 		return items;
@@ -249,7 +102,13 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 //		this.items = new Ext.util.MixedCollection({
 //			items: this.getVoicePickers()
 //		});
-//		this.doLayout();
+
+		this.removeAll();
+		var voicePickers = this.getVoicePickers();
+		for ( var i=0; i<voicePickers.length; i++){
+			this.add(voicePickers[i]);
+		}
+		this.doLayout();
 	},
 	
 	/**
