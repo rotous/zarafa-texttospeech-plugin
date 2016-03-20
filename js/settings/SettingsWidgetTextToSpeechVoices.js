@@ -24,6 +24,10 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 		var availableVoices = ttsPlugin.getAvailableVoices();
 		var selectedVoices = ttsPlugin.selectedVoices;
 		for ( var lang in availableVoices ){
+			for ( var i=0; i<availableVoices[lang].length; i++ ){
+				var internalExternal = availableVoices[lang][i].localService === true ? 'internal' : 'external';
+				availableVoices[lang][i].displayName = internalExternal + ' - ' + availableVoices[lang][i].name;
+			}
 			var comboStore = new Ext.data.JsonStore({
 				// store config
 				autoDestroy: true,
@@ -31,7 +35,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 				// reader config
 				root: 'voices',
 				idProperty: 'name',
-				fields: ['enabled', 'name', 'lang', 'module']
+				fields: ['enabled', 'name', 'lang', 'module', 'displayName', 'type']
 			});
 			var combo = new Ext.form.ComboBox({
 				xtype: 'combo',
@@ -40,7 +44,7 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 				triggerAction: 'all',
 				store: comboStore,
 				width: 250,
-				displayField: 'name',
+				displayField: 'displayName',
 				valueField: 'name',
 				forceSelection: true,
 				editable: false,
@@ -119,21 +123,27 @@ Zarafa.plugins.texttospeech.settings.SettingsWidgetVoices = Ext.extend(Zarafa.se
 	 */
 	updateSettings : function(settingsModel)
 	{
-/*
+		var voicePickers = this.items;
+		var selectedVoices = {};
+		voicePickers.each(function(compositeField){
+			var lang = compositeField.ref;
+			var enabled = compositeField.items.itemAt(0).getValue();
+			var combo = compositeField.items.itemAt(2);
+			var name = combo.getValue();
+			var record = combo.findRecord('name', name);
+			var langCode = record.get('lang');
+			selectedVoices[lang] = {
+				name: name,
+				langCode: langCode,
+				enabled: enabled
+			};
+		}, this);
+
+		this.ttsPlugin.selectedVoices = selectedVoices;
 		// We will not store the settings in the SettingsModel
 		// but in localStorage because the settings are for
 		// this browser on this computer only
-		var selectedRecords = this.grid.getSelectionModel().getSelections();
-		this.ttsPlugin.selectedVoices = {};
-		this.grid.getStore().each(function(item){
-			this.ttsPlugin.selectedVoices[item.get('lang')] = {
-				enabled: item.get('enabled'),
-				name: item.get('name'),
-				langCode: item.get('langCode')
-			};
-		}, this);
 		localStorage.setItem('tts_selected_voices', JSON.stringify(this.ttsPlugin.selectedVoices));
-*/
 	},
 	
 });
